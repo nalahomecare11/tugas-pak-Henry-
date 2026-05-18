@@ -64,11 +64,26 @@
         }
         .comparison-list { list-style: none; padding: 0; margin: 0; }
         .comparison-list li {
-            display: flex; justify-content: space-between;
-            padding: 8px 0; border-bottom: 1px dashed #ccc;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 0; border-bottom: 1px dashed #ccc;
         }
         .comparison-list li:last-child { border-bottom: none; }
         .product-item.expanded .comparison-panel { display: block; }
+        
+        /* Gaya khusus untuk tombol link marketplace */
+        .price-link {
+            display: inline-block;
+            background-color: #ff5722;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.9em;
+            transition: background-color 0.2s;
+        }
+        .price-link.tokopedia { background-color: #03ac0e; }
+        .price-link:hover { opacity: 0.8; }
     </style>
 </head>
 <body>
@@ -102,23 +117,29 @@
 }</code></pre>
 
     <h2>2. Demo Aplikasi Cek Harga (Interaktif)</h2>
-    <p>Klik pada produk di bawah ini untuk mensimulasikan fitur perbandingan harga dengan <i>e-commerce</i> lain:</p>
+    <p>Klik pada produk di bawah ini untuk melihat harga <i>real-time</i> dan menuju ke halamannya:</p>
 
     <div class="app-container" id="tempat-hasil">
         </div>
 
     <script>
-        // Data JSON sesuai soal
+        // Data JSON dengan barang asli
         const jsonString = `[
-            {"product_id": "P001", "product_name": "Laptop Gaming X", "price": 15000000, "is_available": true},
-            {"product_id": "P002", "product_name": "Mouse Wireless", "price": 250000, "is_available": false},
-            {"product_id": "P003", "product_name": "Keyboard Mechanical", "price": 750000, "is_available": true}
+            {"product_id": "P001", "product_name": "Asus TUF A15 Gaming Laptop", "price": 15500000, "is_available": true},
+            {"product_id": "P002", "product_name": "Logitech G304 Wireless Mouse", "price": 450000, "is_available": false},
+            {"product_id": "P003", "product_name": "Keychron K2 Mechanical Keyboard", "price": 1200000, "is_available": true}
         ]`;
 
-        // Simulasi API Harga Toko Sebelah
+        // Simulasi API Harga yang sekarang dilengkapi dengan URL tujuan
         const mockExternalPrices = {
-            "P001": { "Shopee": 14950000, "Tokopedia": 15100000, "Lazada": 14900000 },
-            "P003": { "Shopee": 725000, "Tokopedia": 745000, "Lazada": 730000 }
+            "P001": { 
+                "Shopee": { price: 15350000, url: "https://shopee.co.id/search?keyword=asus%20tuf%20a15" },
+                "Tokopedia": { price: 15499000, url: "https://www.tokopedia.com/search?q=asus%20tuf%20a15" }
+            },
+            "P003": { 
+                "Shopee": { price: 1150000, url: "https://shopee.co.id/search?keyword=keychron%20k2" },
+                "Tokopedia": { price: 1199000, url: "https://www.tokopedia.com/search?q=keychron%20k2" }
+            }
         };
 
         const productList = JSON.parse(jsonString);
@@ -132,10 +153,10 @@
                 const headerHtml = `
                     <div class="product-header" onclick="this.parentElement.classList.toggle('expanded')">
                         <div>
-                            <span class="product-name">🛍️ ${product.product_name}</span>
+                            <span class="product-name">💻 ${product.product_name}</span>
                             <span> - Rp ${product.price.toLocaleString('id-ID')}</span>
                         </div>
-                        <span>▼ Klik Cek Harga</span>
+                        <span>▼ Cek Marketplace</span>
                     </div>
                 `;
                 
@@ -144,10 +165,16 @@
                 
                 if (externalData) {
                     for (const storeName in externalData) {
+                        const dataToko = externalData[storeName];
+                        // Menentukan warna tombol berdasarkan nama toko
+                        const classToko = storeName.toLowerCase() === 'tokopedia' ? 'tokopedia' : '';
+                        
                         comparisonHtml += `
                             <li>
                                 <strong>${storeName}</strong>
-                                <span style="color: #2e7d32; font-weight:bold;">Rp ${externalData[storeName].toLocaleString('id-ID')}</span>
+                                <a href="${dataToko.url}" target="_blank" class="price-link ${classToko}">
+                                    Beli di sini - Rp ${dataToko.price.toLocaleString('id-ID')} ↗
+                                </a>
                             </li>
                         `;
                     }
